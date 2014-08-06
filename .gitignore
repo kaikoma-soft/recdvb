@@ -1,0 +1,14 @@
+*.o
+Makefile
+.deps
+autom4te.cache/
+checksignal
+config.h
+config.h.in
+config.log
+config.status
+configure
+recdvb
+recdvbctl
+version.h
+

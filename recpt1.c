@@ -294,13 +294,18 @@ reader_func(void *p)
         buf = sbuf; /* default */
 
         if(use_b25) {
-            code = b25_decode(dec, &sbuf, &dbuf);
-            if(code < 0) {
-                fprintf(stderr, "b25_decode failed (code=%d). fall back to encrypted recording.\n", code);
-                use_b25 = FALSE;
-            }
-            else
-                buf = dbuf;
+			code = b25_decode(dec, &sbuf, &dbuf);
+			
+			while(code < 0){
+				//decoder restart
+				fprintf(stderr, "b25_decode failed (code=%d).\n", code);
+				fprintf(stderr, "decoder restart! \n");
+				b25_shutdown(dec);
+				b25_startup(tdata->dopt);
+				code = b25_decode(dec, &sbuf, &dbuf);
+			}
+           
+            buf = dbuf;
         }
 
 
