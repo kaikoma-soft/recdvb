@@ -22,13 +22,14 @@ void
 show_options(void)
 {
     fprintf(stderr, "Options:\n");
-    fprintf(stderr, "--pid:               Process id of recdvb to control\n");
+    fprintf(stderr, "--pid:               Process id of recpt1 to control\n");
     fprintf(stderr, "--channel:           Tune to specified channel\n");
 	fprintf(stderr, "--sid SID1,SID2,...: Specify SID number in CSV format (101,102,...)\n");
     fprintf(stderr, "--extend:            Extend recording time\n");
     fprintf(stderr, "--time:              Set total recording time\n");
     fprintf(stderr, "--help:              Show this help\n");
     fprintf(stderr, "--version:           Show version\n");
+    fprintf(stderr, "--list:              Show channel list\n");
 }
 
 int
@@ -53,6 +54,7 @@ main(int argc, char **argv)
         { "time",      1, NULL, 't'},
         { "help",      0, NULL, 'h'},
         { "version",   0, NULL, 'v'},
+        { "list",      0, NULL, 'l'},
         {0, 0, NULL, 0} /* terminate */
     };
 
@@ -65,11 +67,17 @@ main(int argc, char **argv)
             fprintf(stderr, "\n");
             show_options();
             fprintf(stderr, "\n");
+            show_channels();
+            fprintf(stderr, "\n");
             exit(0);
             break;
         case 'v':
             fprintf(stderr, "%s %s\n", argv[0], version);
-            fprintf(stderr, "control command for recdvb.\n");
+            fprintf(stderr, "control command for recpt1.\n");
+            exit(0);
+            break;
+        case 'l':
+            show_channels();
             exit(0);
             break;
         /* following options require argument */

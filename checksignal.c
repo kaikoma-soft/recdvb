@@ -92,7 +92,7 @@ init_signal_handlers(pthread_t *signal_thread, thread_data *tdata)
 void
 show_usage(char *cmd)
 {
-    fprintf(stderr, "Usage: \n%s [--dev devicenumber] channel\n", cmd);
+    fprintf(stderr, "Usage: \n%s [--dev devicenumber] [--lnb voltage] [--bell] channel\n", cmd);
     fprintf(stderr, "\n");
 }
 
@@ -101,8 +101,11 @@ show_options(void)
 {
     fprintf(stderr, "Options:\n");
     fprintf(stderr, "--dev N:             Use DVB device /dev/dvb/adapterN\n");
+    fprintf(stderr, "--lnb voltage:       Specify LNB voltage (0, 11, 15)\n");
+    fprintf(stderr, "--bell:              Notify signal quality by bell\n");
     fprintf(stderr, "--help:              Show this help\n");
     fprintf(stderr, "--version:           Show version\n");
+    fprintf(stderr, "--list:              Show channel list\n");
 }
 
 int
@@ -113,23 +116,38 @@ main(int argc, char **argv)
     int result;
     int option_index;
     struct option long_options[] = {
+        { "bell",      0, NULL, 'b'},
         { "help",      0, NULL, 'h'},
         { "version",   0, NULL, 'v'},
+        { "list",      0, NULL, 'l'},
         { "LNB",       1, NULL, 'n'},
+        { "lnb",       1, NULL, 'n'},
         { "dev",       1, NULL, 'd'},
         {0, 0, NULL, 0} /* terminate */
     };
 
-    int dev_num = 0;
+    tdata.lnb = -1;
+    tdata.tfd = -1;
+    tdata.fefd = 0;
+    tdata.dmxfd = 0;
+    int dev_num = -1;
+    int val;
+    char *voltage[] = {"11V", "15V", "0V"};
+    boolean use_bell = FALSE;
 
     while((result = getopt_long(argc, argv, "bhvln:d:",
                                 long_options, &option_index)) != -1) {
         switch(result) {
+        case 'b':
+            use_bell = TRUE;
+            break;
         case 'h':
             fprintf(stderr, "\n");
             show_usage(argv[0]);
             fprintf(stderr, "\n");
             show_options();
+            fprintf(stderr, "\n");
+            show_channels();
             fprintf(stderr, "\n");
             exit(0);
             break;
@@ -138,7 +156,26 @@ main(int argc, char **argv)
             fprintf(stderr, "signal check utility for DVB tuner.\n");
             exit(0);
             break;
+        case 'l':
+            show_channels();
+            exit(0);
+            break;
         /* following options require argument */
+        case 'n':
+            val = atoi(optarg);
+            switch(val) {
+            case 11:
+                tdata.lnb = 0;	// SEC_VOLTAGE_13 “ú–{‚Í11V(PT1/2/3‚Í12V)
+                break;
+            case 15:
+                tdata.lnb = 1;	// SEC_VOLTAGE_18 “ú–{‚Í15V
+                break;
+            default:
+                tdata.lnb = 2;	// SEC_VOLTAGE_OFF
+                break;
+            }
+            fprintf(stderr, "LNB = %s\n", voltage[tdata.lnb]);
+            break;
         case 'd':
             dev_num = atoi(optarg);
             break;
@@ -165,7 +202,7 @@ main(int argc, char **argv)
         if(f_exit)
             break;
         /* show signal strength */
-        calc_cn();
+        calc_cn(tdata.fefd, tdata.table->type, use_bell);
         sleep(1);
     }
 

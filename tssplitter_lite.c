@@ -34,7 +34,7 @@ static int AnalyzePat(splitter *sp, unsigned char *buf);
 static int RecreatePat(splitter *sp, unsigned char *buf, int *pos);
 static char** AnalyzeSid(char *sid);
 static int AnalyzePmt(splitter *sp, unsigned char *buf, unsigned char mark);
-static int GetCrc32(unsigned char *data, int len);
+static unsigned int GetCrc32(unsigned char *data, int len);
 static int GetPid(unsigned char *data);
 
 /**
@@ -64,7 +64,7 @@ static char** AnalyzeSid(
 	}
 
 	/* sid_listの数はカンマの数+2(NULL止めするから) */
-	sid_list = malloc(sizeof(char*)*(CommaNum+2));
+	sid_list = (char **)malloc(sizeof(char*)*(CommaNum+2));
 	if ( sid_list == NULL )
 	{
 		fprintf(stderr, "AnalyzeSid() malloc error.\n");
@@ -139,7 +139,7 @@ splitter* split_startup(
 )
 {
 	splitter* sp;
-	sp = malloc(sizeof(splitter));
+	sp = (splitter *)malloc(sizeof(splitter));
 	if ( sp == NULL )
 	{
 		fprintf(stderr, "split_startup malloc error.\n");
@@ -334,7 +334,7 @@ int split_ts(
 			}
 			else {
 				splitter->pat_count += 1;
-				if(0 == splitter->pat_count % 0x10) {
+				if(0 == (splitter->pat_count & 0x0fU)) {
 					splitter->pat_count -= 0x10;
 				}
 			}
@@ -383,6 +383,24 @@ int split_ts(
 	return result;
 }
 
+#define	ARIB_PID_MAX	20     //適当
+
+char	arib_pids[ARIB_PID_MAX];
+int		arib_pids_cnt = 0;
+#ifdef ENABLE_EXTRA_SID
+int		caption;
+int		es_data;
+int		es_other;
+#endif
+
+// PMTに由来しないARIB定義PIDの保存
+void AribPidSet( unsigned char *pids, char pid )
+{
+	*(pids+pid) = 1;
+	if( arib_pids_cnt < ARIB_PID_MAX )
+		arib_pids[arib_pids_cnt++] = pid;
+}
+
 /**
  * PAT 解析処理
  *
@@ -423,6 +441,11 @@ static int AnalyzePat(splitter *sp, unsigned char *buf)
 		sp->pmt_retain = 0;
 		memset(pos, 0, sizeof(pos));
 		size = buf[7];
+#ifdef ENABLE_EXTRA_SID
+		caption = FALSE;		// 字幕PID保存フラグ初期化
+		es_data = FALSE;		// データ放送
+		es_other = FALSE;
+#endif
 
 		/* prescan SID/PMT */
 		for(i = 13, j = 0; i < (size + 8) - 4; i = i + 4) {
@@ -528,20 +551,33 @@ static int AnalyzePat(splitter *sp, unsigned char *buf)
 				}
 				else if(!strcasecmp(*p, "epg")) {
 					/* epg抽出に必要なPIDのみを保存する */
-					sid_found    = TRUE;
-					*(pids+0x11) = 1;
-					*(pids+0x12) = 1;
-					*(pids+0x23) = 1;         // SDTT
-					*(pids+0x29) = 1;         // CDT
+					sid_found = TRUE;
+					AribPidSet(pids, 0x11);
+					AribPidSet(pids, 0x12);
+					AribPidSet(pids, 0x23);         // SDTT
+					AribPidSet(pids, 0x29);         // CDT
 				}
 				else if(!strcasecmp(*p, "epg1seg")) {
 					/* ワンセグ用epg抽出に必要なPIDのみを保存する */
-					sid_found    = TRUE;
-					*(pids+0x11) = 1;
-//					*(pids+0x26) = 1;         // 車載用epg 規格のみで未送出のもよう
-					*(pids+0x27) = 1;
+					sid_found = TRUE;
+					AribPidSet(pids, 0x11);
+//					AribPidSet(pids, 0x26);         // 車載用epg 規格のみで未送出のもよう
+					AribPidSet(pids, 0x27);
 				}
-
+#ifdef ENABLE_EXTRA_SID
+				else if(!strcasecmp(*p, "caption")) {
+					/* 字幕PID保存 ES PIDなのでフラグのみ変更 */
+					caption = TRUE;
+				}
+				else if(!strcasecmp(*p, "data")) {
+					/* データ放送PID保存 ES PIDなのでフラグのみ変更 */
+					es_data = TRUE;
+				}
+				else if(!strcasecmp(*p, "other")) {
+					/*  ES PIDなのでフラグのみ変更 */
+					es_other = TRUE;
+				}
+#endif
 				p++;
 			} /* while */
 		}
@@ -609,7 +645,7 @@ static int RecreatePat(splitter *sp, unsigned char *buf, int *pos)
 #endif
 {
 	unsigned char y[LENGTH_CRC_DATA];
-	int crc;
+	unsigned int crc;
 	int i;
 	int j;
 	int pos_i;
@@ -684,8 +720,8 @@ static int AnalyzePmt(splitter *sp, unsigned char *buf, unsigned char mark)
 	unsigned char* pids					// [out]	出力対象 PID 情報
 #endif
 {
-	unsigned char Nall;
-	unsigned char N;
+	unsigned int Nall;
+	unsigned int N;
 	int pcr;
 	int epid;
 	int pid;
@@ -695,7 +731,7 @@ static int AnalyzePmt(splitter *sp, unsigned char *buf, unsigned char mark)
 
 	pid = GetPid(&buf[1]);
 	if (buf[1] & 0x40) {		// PES開始インジケータ
-		sp->section_remain[pid] = ((buf[6] & 0x0F) << 8) + buf[7] + 3;	// セクションサイズ取得(ヘッダ込)
+		sp->section_remain[pid] = ((uint16_t)(buf[6] & 0x0FU) << 8) + buf[7] + 3;	// セクションサイズ取得(ヘッダ込)
 		payload_offset = 5;
 
 		for (count = 0; sp->pmt_retain > count; count++) {
@@ -710,8 +746,8 @@ static int AnalyzePmt(splitter *sp, unsigned char *buf, unsigned char mark)
 		sp->pids[pcr] = mark;
 
 		// ECM
-		N = ((buf[payload_offset + 10] & 0x0F) << 8) + buf[payload_offset + 11] + payload_offset + 12;	// ES情報開始点
-		int p = payload_offset + 12;
+		N = ((unsigned int)(buf[payload_offset + 10] & 0x0F) << 8) + buf[payload_offset + 11] + payload_offset + 12;	// ES情報開始点
+		unsigned int p = payload_offset + 12;
 
 		while(p < N) {
 			uint32_t ca_pid;
@@ -723,7 +759,8 @@ static int AnalyzePmt(splitter *sp, unsigned char *buf, unsigned char mark)
 			p += 2;
 
 			if(tag == 0x09 && len >= 4 && p+len <= N) {
-				ca_pid = ((buf[p+2] << 8) | buf[p+3]) & 0x1fff;
+//				ca_pid = ((buf[p+2] << 8) | buf[p+3]) & 0x1fff;
+				ca_pid = GetPid( &buf[p+2] );
 				sp->pids[ca_pid] = mark;
 			}
 			p += len;
@@ -738,12 +775,30 @@ static int AnalyzePmt(splitter *sp, unsigned char *buf, unsigned char mark)
 	sp->packet_seq[pid] = buf[3] & 0x0F;				// 巡回カウンタ
 
 	Nall = sp->section_remain[pid];
-	if(Nall > LENGTH_PACKET - payload_offset)
-		Nall = LENGTH_PACKET - payload_offset;
+	if(Nall > LENGTH_PACKET - (unsigned int)payload_offset)
+		Nall = LENGTH_PACKET - (unsigned int)payload_offset;
 
 	// ES PID
 	while (N <= Nall + payload_offset - 5)
 	{
+#ifdef ENABLE_EXTRA_SID
+		do{
+			if( buf[N] == 0x0d ){	// データ放送
+				if( es_data == FALSE )
+					break;
+			}else
+			if( buf[N] == 0x06 ){	// 字幕
+				if( caption == FALSE )
+					break;
+			}else
+			if( buf[N]==0x0a || buf[N]==0x0b || buf[N]==0x0c )
+				if( es_other == FALSE )
+					break;
+			epid = GetPid(&buf[N + 1]);
+			sp->pids[epid] = mark;
+fprintf(stderr, "type:0x%02X PID:0x%04x\n", buf[N], epid );
+		}while(0);
+#else
 		// ストリーム種別が 0x0D（type D）は出力対象外
 		if (0x0D != buf[N])
 		{
@@ -751,9 +806,10 @@ static int AnalyzePmt(splitter *sp, unsigned char *buf, unsigned char mark)
 
 			sp->pids[epid] = mark;
 		}
-		N += 4 + (((buf[N + 3]) & 0x0F) << 8) + buf[N + 4] + 1;
+#endif
+		N += 5 + (((unsigned int)buf[N + 3] & 0x0F) << 8) + buf[N + 4];
 		retry_count++;
-		if(retry_count > Nall) {
+		if((unsigned int)retry_count > Nall) {
 			return TSS_ERROR;
 		}
 	}
@@ -761,26 +817,32 @@ static int AnalyzePmt(splitter *sp, unsigned char *buf, unsigned char mark)
 
 	if (sp->section_remain[pid] > 0)
 		return SECTION_CONTINUE;
-	else
+	else{
+		// PMTに由来しないPIDの保護
+		if( mark != 1 ){
+			for( count=0; count<arib_pids_cnt; count++ )
+				sp->pids[(int)arib_pids[count]] = mark;
+		}
 		return TSS_SUCCESS;
+	}
 }
 
 /**
  * CRC 計算
  */
-static int GetCrc32(
+static unsigned int GetCrc32(
 	unsigned char* data,				// [in]		CRC 計算対象データ
 	int len)							// [in]		CRC 計算対象データ長
 {
-	int crc;
+	unsigned int crc;
 	int i, j;
-	int c;
-	int bit;
+	unsigned int c;
+	unsigned int bit;
 
-	crc = 0xFFFFFFFF;
+	crc = 0xFFFFFFFFU;
 	for (i = 0; i < len; i++)
 	{
-		char x;
+		unsigned int x;
 		x = data[i];
 
 		for (j = 0; j < 8; j++)
@@ -789,7 +851,7 @@ static int GetCrc32(
 			bit = (x >> (7 - j)) & 0x1;
 
 			c = 0;
-			if (crc & 0x80000000)
+			if (crc & 0x80000000U)
 			{
 				c = 1;
 			}
@@ -798,10 +860,10 @@ static int GetCrc32(
 
 			if (c ^ bit)
 			{
-				crc ^= 0x04C11DB7;
+				crc ^= 0x04C11DB7U;
 			}
 
-			crc &= 0xFFFFFFFF;
+			crc &= 0xFFFFFFFFU;
 		}
 	}
 
@@ -814,5 +876,5 @@ static int GetCrc32(
 static int GetPid(
 	unsigned char* data)				// [in]		取得対象データのポインタ
 {
-	return ((data[0] & 0x1F) << 8) + data[1];
+	return (int)((((unsigned int)data[0] & 0x1F) << 8) | (unsigned int)data[1]);
 }

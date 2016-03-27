@@ -5,10 +5,11 @@ bindir = @bindir@
 CC = @CC@
 
 TARGET = recdvb
-TARGET2 = recdvbctl
-TARGET3 = checksignal
-TARGETS = $(TARGET) $(TARGET2) $(TARGET3)
-RELEASE_VERSION = "1.2.0"
+TARGET2 = recpt1ctl
+TARGET3 = chkdvbsignal
+TARGET4 = tssplitter_lite
+TARGETS = $(TARGET) $(TARGET2) $(TARGET3) $(TARGET4)
+RELEASE_VERSION = "1.2.1.0"
 
 CPPFLAGS = -Wall -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 CFLAGS   = -O2 -g -pthread
@@ -16,13 +17,19 @@ CFLAGS   = -O2 -g -pthread
 LIBS     = @LIBS@
 LIBS2    = -lm
 LIBS3    = -lpthread -lm
+LIBS4    =
 LDFLAGS  =
 
 OBJS  = recpt1.o decoder.o mkpath.o tssplitter_lite.o recpt1core.o
 OBJS2 = recpt1ctl.o recpt1core.o
 OBJS3 = checksignal.o recpt1core.o
-OBJALL = $(OBJS) $(OBJS2) $(OBJS3)
+OBJS4 = tssplitter_lite.o tsmain.o
+OBJALL = $(OBJS) $(OBJS2) $(OBJS3) $(OBJS4)
 DEPEND = .deps
+
+ifdef EXTRA_SID
+CPPFLAGS += -DENABLE_EXTRA_SID
+endif
 
 all: $(TARGETS)
 
@@ -43,6 +50,9 @@ $(TARGET2): $(OBJS2)
 
 $(TARGET3): $(OBJS3)
 	$(CC) $(LDFLAGS) -o $@ $(OBJS3) $(LIBS3)
+
+$(TARGET4): $(OBJS4)
+	$(CC) $(LDFLAGS) -o $@ $(OBJS4) $(LIBS4)
 
 $(DEPEND): version.h
 	$(CC) -MM $(OBJS:.o=.c) $(OBJS2:.o=.c) $(CPPFLAGS) > $@

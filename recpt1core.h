@@ -58,6 +58,9 @@ typedef struct msgbuf {
 typedef struct thread_data {
     int tfd;    /* tuner fd */ //xxx variable
 
+    int fefd;   // DVB
+    int dmxfd;  // DVB
+
     int wfd;    /* output file fd */ //invariable
     int lnb;    /* LNB voltage */ //invariable
     int msqid; //invariable
@@ -69,6 +72,7 @@ typedef struct thread_data {
     boolean tune_persistent; //invaliable
 
     QUEUE_T *queue; //invariable
+    ISDB_T_FREQ_CONV_TABLE *table; //invariable
     sock_data *sock_data; //invariable
     pthread_t signal_thread; //invariable
     decoder *decoder; //invariable
@@ -77,15 +81,18 @@ typedef struct thread_data {
 } thread_data;
 
 extern const char *version;
-extern char *bsdev[];
-extern char *isdb_t_dev[];
 
+extern ISDB_T_FREQ_CONV_TABLE isdb_t_conv_set;
 extern boolean f_exit;
 
 /* prototypes */
 int tune(char *channel, thread_data *tdata, int dev_num);
+int set_frequency(thread_data *tdata, boolean);
 int close_tuner(thread_data *tdata);
-void calc_cn(void);
+int lnb_control(int dev_num, int lnb_vol);
+void show_channels(void);
+ISDB_T_FREQ_CONV_TABLE *searchrecoff(char *channel);
+void calc_cn(int fd, int type, boolean use_bell);
 int parse_time(char *rectimestr, int *recsec);
 void do_bell(int bell);
 

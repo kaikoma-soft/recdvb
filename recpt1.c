@@ -44,6 +44,8 @@
 
 /* globals */
 extern boolean f_exit;
+void stream_start(thread_data *tdata);
+void stream_stop(thread_data *tdata);
 
 
 //read 1st line from socket
@@ -72,6 +74,7 @@ void read_line(int socket, char *p){
 void *
 mq_recv(void *t)
 {
+    ISDB_T_FREQ_CONV_TABLE *table = NULL;
     thread_data *tdata = (thread_data *)t;
     message_buf rbuf;
     char channel[16];
@@ -85,16 +88,50 @@ mq_recv(void *t)
 
 		sscanf(rbuf.mtext, "ch=%s t=%d e=%d sid=%s", channel, &recsec, &time_to_add, service_id);
 
+	    ISDB_T_FREQ_CONV_TABLE stock = tdata->table[0];
+		boolean tbl_stat = tdata->table == &isdb_t_conv_set ? TRUE : FALSE;
+		if((table = searchrecoff(channel)) != NULL){
+//			tdata->table[0] = stock;
+	        if(strcmp(table->parm_freq, stock.parm_freq)) {
+				strcpy(channel, table->parm_freq);
 
-            /* wait for remainder */
-            while(tdata->queue->num_used > 0) {
-                usleep(10000);
-            }
-//            if(close_tuner(tdata) != 0)
-//                return NULL;
+	            /* stop stream */
+//	            stream_stop(tdata);
 
-            tune(channel, tdata, 0);
+	            /* wait for remainder */
+	            while(tdata->queue->num_used > 0) {
+	                usleep(10000);
+	            }
 
+#if 1
+	            if (table->type != stock.type) {
+	                /* re-open device */
+	                tdata->table = &stock;
+	                if(close_tuner(tdata) != 0)
+	                    return NULL;
+
+//		            tdata->table = table;
+	                tune(channel, tdata, -1);
+	            } else {
+		            tdata->table = table;
+	                /* SET_CHANNEL only */
+	                if(set_frequency(tdata, FALSE)) {
+	                    fprintf(stderr, "Cannot tune to the specified channel\n");
+	                    goto CHECK_TIME_TO_ADD;
+	                }
+//	                stream_start(tdata);
+	                calc_cn(tdata->fefd, tdata->table->type, FALSE);
+	            }
+#else
+		        tdata->table = table;
+	            tune(channel, tdata, -1);
+#endif
+			}else
+			if(tbl_stat && table == &isdb_t_conv_set)
+				isdb_t_conv_set = stock;
+        }
+
+CHECK_TIME_TO_ADD:
         if(time_to_add) {
             tdata->recsec += time_to_add;
             fprintf(stderr, "Extended %d sec\n", time_to_add);
@@ -294,18 +331,27 @@ reader_func(void *p)
         buf = sbuf; /* default */
 
         if(use_b25) {
-			code = b25_decode(dec, &sbuf, &dbuf);
-			
-			while(code < 0){
-				//decoder restart
-				fprintf(stderr, "b25_decode failed (code=%d).\n", code);
-				fprintf(stderr, "decoder restart! \n");
-				b25_shutdown(dec);
-				b25_startup(tdata->dopt);
-				code = b25_decode(dec, &sbuf, &dbuf);
-			}
-           
-            buf = dbuf;
+            int lp = 0;
+
+            while(1){
+	            code = b25_decode(dec, &sbuf, &dbuf);
+	            if(code < 0) {
+					fprintf(stderr, "b25_decode failed (code=%d).", code);
+	                if(lp++ < 5){
+						//decoder restart
+						fprintf(stderr, "\ndecoder restart! \n");
+						b25_shutdown(dec);
+						b25_startup(tdata->dopt);
+					}else{
+		                fprintf(stderr, " fall back to encrypted recording.\n");
+		                use_b25 = FALSE;
+		                break;
+		            }
+	            }else{
+	                buf = dbuf;
+		            break;
+		        }
+	        }
         }
 
 
@@ -314,7 +360,7 @@ reader_func(void *p)
 
             /* allocate split buffer */
             if(splitbuf.buffer_size < buf.size && buf.size > 0) {
-                splitbuf.buffer = realloc(splitbuf.buffer, buf.size);
+                splitbuf.buffer = (u_char *)realloc(splitbuf.buffer, buf.size);
                 if(splitbuf.buffer == NULL) {
                     fprintf(stderr, "split buffer allocation failed\n");
                     use_splitter = FALSE;
@@ -323,18 +369,18 @@ reader_func(void *p)
             }
 
             while(buf.size) {
-                /* $BJ,N%BP>](JPID$B$NCj=P(J */
+                /* 分離対象PIDの抽出 */
                 if(split_select_finish != TSS_SUCCESS) {
                     split_select_finish = split_select(splitter, &buf);
                     if(split_select_finish == TSS_NULL) {
-                        /* malloc$B%(%i!<H/@8(J */
+                        /* mallocエラー発生 */
                         fprintf(stderr, "split_select malloc failed\n");
                         use_splitter = FALSE;
                         goto fin;
                     }
                     else if(split_select_finish != TSS_SUCCESS) {
-                        /* $BJ,N%BP>](JPID$B$,40A4$KCj=P$G$-$k$^$G=PNO$7$J$$(J
-                         * 1$BICDxEYM>M5$r8+$k$H$$$$$+$b(J
+                        /* 分離対象PIDが完全に抽出できるまで出力しない
+                         * 1秒程度余裕を見るといいかも
                          */
                         time_t cur_time;
                         time(&cur_time);
@@ -346,7 +392,7 @@ reader_func(void *p)
                     }
                 }
 
-                /* $BJ,N%BP>]0J30$r$U$k$$Mn$H$9(J */
+                /* 分離対象以外をふるい落とす */
                 code = split_ts(splitter, &buf, &splitbuf);
                 if(code == TSS_NULL) {
                     fprintf(stderr, "PMT reading..\n");
@@ -421,7 +467,7 @@ reader_func(void *p)
             }
 
             if(use_splitter) {
-                /* $BJ,N%BP>]0J30$r$U$k$$Mn$H$9(J */
+                /* 分離対象以外をふるい落とす */
                 code = split_ts(splitter, &buf, &splitbuf);
                 if(code == TSS_NULL) {
                     split_select_finish = TSS_ERROR;
@@ -475,15 +521,18 @@ reader_func(void *p)
 void
 show_usage(char *cmd)
 {
+    fprintf(stderr, "%s Ver %s\n", cmd, version);
 #ifdef HAVE_LIBARIB25
     fprintf(stderr, "Usage: \n%s [--b25 [--round N] [--strip] [--EMM]] [--udp [--addr hostname --port portnumber]] [--http portnumber] [--dev devicenumber] [--lnb voltage] [--sid SID1,SID2] channel rectime destfile\n", cmd);
 #else
-    fprintf(stderr, "Usage: \n%s [--strip] [--EMM]] [--udp [--addr hostname --port portnumber]] [--dev devicenumber] [--lnb voltage] [--sid SID1,SID2] channel rectime destfile\n", cmd);
+    fprintf(stderr, "Usage: \n%s [--udp [--addr hostname --port portnumber]] [--http portnumber] [--dev devicenumber] [--lnb voltage] [--sid SID1,SID2] channel rectime destfile\n", cmd);
 #endif
     fprintf(stderr, "\n");
     fprintf(stderr, "Remarks:\n");
     fprintf(stderr, "if rectime  is '-', records indefinitely.\n");
     fprintf(stderr, "if destfile is '-', stdout is used for output.\n");
+    fprintf(stderr, "\n");
+    fprintf(stderr, "LNB control: %s --dev devicenumber --lnb voltage\n", cmd);
 }
 
 void
@@ -505,13 +554,14 @@ show_options(void)
     fprintf(stderr, "--sid SID1,SID2,...: Specify SID number in CSV format (101,102,...)\n");
     fprintf(stderr, "--help:              Show this help\n");
     fprintf(stderr, "--version:           Show version\n");
+    fprintf(stderr, "--list:              Show channel list\n");
 }
 
 void
 cleanup(thread_data *tdata)
 {
     /* stop recording */
-//    ioctl(tdata->tfd, STOP_REC, 0);
+//	stream_stop(tdata);
 
     f_exit = TRUE;
 
@@ -597,8 +647,10 @@ main(int argc, char **argv)
         0   /* emm */
     };
     tdata.dopt = &dopt;
-    tdata.lnb = 0;
+    tdata.lnb = -1;
     tdata.tfd = -1;
+    tdata.fefd = 0;
+    tdata.dmxfd = 0;
 
     int result;
     int option_index;
@@ -620,6 +672,7 @@ main(int argc, char **argv)
         { "dev",       1, NULL, 'd'},
         { "help",      0, NULL, 'h'},
         { "version",   0, NULL, 'v'},
+        { "list",      0, NULL, 'l'},
         { "sid",       1, NULL, 'i'},
         {0, 0, NULL, 0} /* terminate */
     };
@@ -634,13 +687,13 @@ main(int argc, char **argv)
     int port_to = 1234;
     int port_http = 12345;
     sock_data *sockdata = NULL;
-    int dev_num = 0;
+    int dev_num = -1;
     int val;
-    char *voltage[] = {"0V", "11V", "15V"};
+    char *voltage[] = {"11V", "15V", "0V"};
     char *sid_list = NULL;
-	int connected_socket, listening_socket;
+	int connected_socket = 0, listening_socket = 0;
 	unsigned int len;
-	char *channel;
+	char *channel = NULL;
 
     while((result = getopt_long(argc, argv, "br:smn:ua:H:p:d:hvli:",
                                 long_options, &option_index)) != -1) {
@@ -668,10 +721,11 @@ main(int argc, char **argv)
             fprintf(stderr, "creating a http daemon\n");
             break;
         case 'h':
-            fprintf(stderr, "\n");
             show_usage(argv[0]);
             fprintf(stderr, "\n");
             show_options();
+            fprintf(stderr, "\n");
+            show_channels();
             fprintf(stderr, "\n");
             exit(0);
             break;
@@ -680,18 +734,22 @@ main(int argc, char **argv)
             fprintf(stderr, "recorder command for DVB tuner.\n");
             exit(0);
             break;
+        case 'l':
+            show_channels();
+            exit(0);
+            break;
         /* following options require argument */
         case 'n':
             val = atoi(optarg);
             switch(val) {
             case 11:
-                tdata.lnb = 1;
+                tdata.lnb = 0;	// SEC_VOLTAGE_13 日本は11V(PT1/2/3は12V)
                 break;
             case 15:
-                tdata.lnb = 2;
+                tdata.lnb = 1;	// SEC_VOLTAGE_18 日本は15V
                 break;
             default:
-                tdata.lnb = 0;
+                tdata.lnb = 2;	// SEC_VOLTAGE_OFF
                 break;
             }
             fprintf(stderr, "LNB = %s\n", voltage[tdata.lnb]);
@@ -711,7 +769,7 @@ main(int argc, char **argv)
             break;
         case 'd':
             dev_num = atoi(optarg);
-            fprintf(stderr, "using device: /dev/dvb/adapter%d\n", dev_num);
+            fprintf(stderr, "using device: /dev/dvb/adapter%d", dev_num);
             break;
         case 'i':
             use_splitter = TRUE;
@@ -774,9 +832,15 @@ if(use_http){	// http-server add-
             tdata.wfd = -1;
         }
         else {
-            fprintf(stderr, "Arguments are necessary!\n");
-            fprintf(stderr, "Try '%s --help' for more information.\n", argv[0]);
-            return 1;
+            if(argc == optind && dev_num != -1 && tdata.lnb != -1){
+				return lnb_control(dev_num, tdata.lnb);
+			}else{
+	            show_usage(argv[0]);
+	            fprintf(stderr, "\n");
+	            fprintf(stderr, "Arguments are necessary!\n");
+	            fprintf(stderr, "Try '%s --help' for more information.\n", argv[0]);
+	            return 1;
+            }
         }
     }
 
@@ -844,12 +908,13 @@ while(1){	// http-server add-
 
 		peer_host = gethostbyaddr((char *)&peer_sin.sin_addr.s_addr,
 				  sizeof(peer_sin.sin_addr), AF_INET);
+		char    *h_name;
 		if ( peer_host == NULL ){
-			fprintf(stderr, "gethostbyname failed\n");
-			return 1;
-		}
+			h_name = "NONAME";
+		}else
+            h_name = peer_host->h_name;
 
-		fprintf(stderr,"connect from: %s [%s] port %d\n", peer_host->h_name, inet_ntoa(peer_sin.sin_addr), ntohs(peer_sin.sin_port));
+		fprintf(stderr,"connect from: %s [%s] port %d\n", h_name, inet_ntoa(peer_sin.sin_addr), ntohs(peer_sin.sin_port));
 
 		char buf[256];
 		read_line(connected_socket, buf);
@@ -885,20 +950,26 @@ while(1){	// http-server add-
 
 	if(use_http){	// http-server add-
 		char header[] =  "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nCache-Control: no-cache\r\n\r\n";
-		write(connected_socket, header, strlen(header));
+		int len = strlen(header);
+		if(write(connected_socket, header, len) < len){
+			close(connected_socket);
+			if(use_splitter)
+				split_shutdown(splitter);
+			continue;
+		}
 
 		//set write target to http
 		tdata.wfd = connected_socket;
 
 		//tune
-		if(tune(channel, &tdata, dev_num) != 0){
+		if(tune(channel, &tdata, -1) != 0){
 			fprintf(stderr, "Tuner cannot start recording\n");
 			continue;
 		}
 	}else{	// -http-server add
     /* initialize udp connection */
     if(use_udp) {
-      sockdata = calloc(1, sizeof(sock_data));
+      sockdata = (sock_data *)calloc(1, sizeof(sock_data));
       struct in_addr ia;
       ia.s_addr = inet_addr(host_to);
       if(ia.s_addr == INADDR_NONE) {
@@ -977,8 +1048,27 @@ while(1){	// http-server add-
         enqueue(p_queue, bufptr);
 
         /* stop recording */
-        time(&cur_time);
+//        time(&cur_time);
         if((cur_time - tdata.start_time) >= tdata.recsec && !tdata.indefinite) {
+#if 1
+// ここは何とかしたいところ
+//            stream_stop(&tdata);
+            /* read remaining data */
+            do{
+                bufptr = malloc(sizeof(BUFSZ));
+                if(!bufptr) {
+                    f_exit = TRUE;
+                    break;
+                }
+                bufptr->size = read(tdata.tfd, bufptr->buffer, MAX_READ_SIZE);
+                if(bufptr->size <= 0) {
+                    f_exit = TRUE;
+                    enqueue(p_queue, NULL);
+                    break;
+                }
+                enqueue(p_queue, bufptr);
+            }while(cur_time == time(NULL)) ;
+#endif
             break;
         }
     }
