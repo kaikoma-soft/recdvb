@@ -43,6 +43,9 @@ recdvb
 本プログラムはVer1.2.0のフォークです。Ver1.3.0とは別物なのであしからず。
 
 
+version 1.2.1.1 (2016/06/12)
+・DVBデバイス自動時にDVBデバイスで受信できない放送波のチャンネルを指定した場合の不具合を修正
+
 version 1.2.1.0 (2016/03/26)
 ・BS/CSとCATVおよびLNB給電に対応
   BonDriverProxy_LinuxのBonDriver_DVB.cppを参考にしてtune処理などを修正

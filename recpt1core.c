@@ -530,37 +530,42 @@ calc_cn(int fd, int type, boolean use_bell)
     int bell = 0;
 
     if(ioctl(fd, FE_READ_SIGNAL_STRENGTH, &rc) < 0) {
-		ss_errno = errno;
-	    if(ioctl(fd, FE_READ_SNR, &rc)<0){
-			rs_errno = errno;
+		if( errno != 25 ) {
+			ss_errno = errno;
+		    if(ioctl(fd, FE_READ_SNR, &rc)<0){
+				rs_errno = errno;
 #ifdef DTV_STAT_SIGNAL_STRENGTH
-			struct dtv_property prop[1];
-			struct dtv_properties props;
+				struct dtv_property prop[1];
+				struct dtv_properties props;
 
-			prop[0].cmd = DTV_STAT_SIGNAL_STRENGTH;
-//			prop[0].u.data = SEC_VOLTAGE_OFF;
-			props.props = prop;
-			props.num = 1;
+				prop[0].cmd = DTV_STAT_SIGNAL_STRENGTH;
+	//			prop[0].u.data = SEC_VOLTAGE_OFF;
+				props.props = prop;
+				props.num = 1;
 
-			if (ioctl(fd, FE_GET_PROPERTY, &props) < 0){
-				fprintf(stderr, "ERROR: calc_cn() ioctl(FE_GET_PROPERTY) errno=%d(%s)\n", rs_errno, strerror(errno));
+				if (ioctl(fd, FE_GET_PROPERTY, &props) < 0){
+					fprintf(stderr, "ERROR: calc_cn() ioctl(FE_GET_PROPERTY) errno=%d(%s)\n", errno, strerror(errno));
 #endif
-				fprintf(stderr, "ERROR: calc_cn() ioctl(FE_READ_SIGNAL_STRENGTH) errno=%d(%s)\n", ss_errno, strerror(ss_errno));
-				fprintf(stderr, "ERROR: calc_cn() ioctl(FE_READ_SNR) errno=%d(%s)\n", rs_errno, strerror(rs_errno));
-				return;
+					fprintf(stderr, "ERROR: calc_cn() ioctl(FE_READ_SIGNAL_STRENGTH) errno=%d(%s)\n", ss_errno, strerror(ss_errno));
+					fprintf(stderr, "ERROR: calc_cn() ioctl(FE_READ_SNR) errno=%d(%s)\n", rs_errno, strerror(rs_errno));
+					return;
 #ifdef DTV_STAT_SIGNAL_STRENGTH
-			}else{
-			    fprintf(stderr,"\rSNR0: %d", prop[0].u.st.stat[0].uvalue);
-				return;
-			}
+				}else{
+				    fprintf(stderr,"\rSNR0: %d", prop[0].u.st.stat[0].uvalue);
+					return;
+				}
 #endif
-		}else
-			if(tuner_type & EARTH_PT1)
-			    CNR = (double)rc / 256;		// 目算なので適当 "* 4 / 1000"かも
-			else{
-			    fprintf(stderr,"\rSNR: %d", rc);
-				return;
-			}
+			}else
+				if(tuner_type & EARTH_PT1)
+				    CNR = (double)rc / 256;		// 目算なので適当 "* 4 / 1000"かも
+				else{
+				    fprintf(stderr,"\rSNR: %d", rc);
+					return;
+				}
+		}else{
+			fprintf(stderr, "ERROR: calc_cn() ioctl(FE_READ_SIGNAL_STRENGTH) errno=%d(%s)\n", errno, strerror(errno));	// 	Inappropriate ioctl for device
+			return;
+		}
     }else{
 	    if(type == CHTYPE_GROUND) {
 	        P = log10(5505024/(double)rc) * 10;
@@ -781,6 +786,7 @@ tune(char *channel, thread_data *tdata, int dev_num)
 		struct dirent **namelist;
 		int lp;
 		int num_devs = scandir("/dev/dvb", &namelist, selects, alphasort);
+		boolean tuned = FALSE;
 
 		if(num_devs == -1) {
 			perror("scandir");
@@ -838,6 +844,7 @@ tune(char *channel, thread_data *tdata, int dev_num)
                     }
                 }
 
+                tuned = TRUE;
                 if(tdata->tune_persistent)
                     fprintf(stderr, "device = /dev/dvb/adapter%d\n", dev_num);
                 break; /* found suitable tuner */
@@ -848,6 +855,11 @@ tune(char *channel, thread_data *tdata, int dev_num)
 #else
         }
 #endif
+        /* all tuners cannot be used */
+        if(tuned == FALSE) {
+            fprintf(stderr, "Cannot tune to the specified channel\n");
+            return 1;
+        }
 	}
 
     if(tdata->dmxfd == 0){
