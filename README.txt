@@ -12,7 +12,12 @@ recdvb
  * コンパイル時の警告を無くす。
  * 文字コードを UTF-8 に統一
 
+インストール方法は次の通りです。
 
+  % ./autogen.sh
+  % ./configure --enable-b25
+  % make
+  % sudo make install 
 
 
 以下はオリジナルの README
