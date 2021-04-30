@@ -165,10 +165,10 @@ main(int argc, char **argv)
             val = atoi(optarg);
             switch(val) {
             case 11:
-                tdata.lnb = 0;	// SEC_VOLTAGE_13 ì˙ñ{ÇÕ11V(PT1/2/3ÇÕ12V)
+                tdata.lnb = 0;	// SEC_VOLTAGE_13 Êó•Êú¨„ÅØ11V(PT1/2/3„ÅØ12V)
                 break;
             case 15:
-                tdata.lnb = 1;	// SEC_VOLTAGE_18 ì˙ñ{ÇÕ15V
+                tdata.lnb = 1;	// SEC_VOLTAGE_18 Êó•Êú¨„ÅØ15V
                 break;
             default:
                 tdata.lnb = 2;	// SEC_VOLTAGE_OFF

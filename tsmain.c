@@ -16,12 +16,12 @@
 #define FALSE               0
 /**************************************************************************/
 /**
- * °ú¿ôÍÑ¹½Â¤ÂÎ
+ * å¼•æ•°ç”¨æ§‹é€ ä½“
  */
 typedef struct {
-	char* src;				// ÆşÎÏ¥Õ¥¡¥¤¥ë
-	char* dst;				// ½ĞÎÏ¥Õ¥¡¥¤¥ë
-	char* sid;				// ½ĞÎÏÂĞ¾İ¥Á¥ã¥ó¥Í¥ëÈÖ¹æ
+	char* src;				// å…¥åŠ›ãƒ•ã‚¡ã‚¤ãƒ«
+	char* dst;				// å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«
+	char* sid;				// å‡ºåŠ›å¯¾è±¡ãƒãƒ£ãƒ³ãƒãƒ«ç•ªå·
 } PARAM;
 typedef int boolean;
 
@@ -37,28 +37,28 @@ int execute(PARAM* param);
  *
  */
 int main(
-	int argc,							// [in]		°ú¿ô¤Î¸Ä¿ô
-	char** argv)						// [in]		°ú¿ô
+	int argc,							// [in]		å¼•æ•°ã®å€‹æ•°
+	char** argv)						// [in]		å¼•æ•°
 {
 	PARAM param;
 
-	int result;							// ½èÍı·ë²Ì
+	int result;							// å‡¦ç†çµæœ
 
-	// ¥Ñ¥é¥á¡¼¥¿²òÀÏ
+	// ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿è§£æ
 	result = AnalyzeParam(argc, argv, &param);
 	if (TSS_SUCCESS != result)
 	{
 		return result;
 	}
 
-	// ½èÍı¼Â¹Ô
+	// å‡¦ç†å®Ÿè¡Œ
 	result = execute(&param);
 
 	return result;
 }
 
 /**
- * »ÈÍÑÊıË¡¥á¥Ã¥»¡¼¥¸½ĞÎÏ
+ * ä½¿ç”¨æ–¹æ³•ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸å‡ºåŠ›
  */
 void show_usage()
 {
@@ -72,14 +72,14 @@ void show_usage()
 }
 
 /**
- * ¥Ñ¥é¥á¡¼¥¿²òÀÏ
+ * ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿è§£æ
  */
 int AnalyzeParam(
-	int argc,							// [in]		°ú¿ô¤Î¸Ä¿ô
-	char** argv,						// [in]		°ú¿ô
-	PARAM* param)						// [out]	°ú¿ô¾ğÊó¥Ç¡¼¥¿
+	int argc,							// [in]		å¼•æ•°ã®å€‹æ•°
+	char** argv,						// [in]		å¼•æ•°
+	PARAM* param)						// [out]	å¼•æ•°æƒ…å ±ãƒ‡ãƒ¼ã‚¿
 {
-	// °ú¿ô¥Á¥§¥Ã¥¯
+	// å¼•æ•°ãƒã‚§ãƒƒã‚¯
 	if ((3 != argc) && (4 != argc) && (5 != argc))
 	{
 		show_usage();
@@ -99,25 +99,25 @@ int AnalyzeParam(
 }
 
 /**
- * ¼Â½èÍı
+ * å®Ÿå‡¦ç†
  */
 int execute(
-	PARAM* param)						// [in]		°ú¿ô¾ğÊó¥Ç¡¼¥¿
+	PARAM* param)						// [in]		å¼•æ•°æƒ…å ±ãƒ‡ãƒ¼ã‚¿
 {
-	int sfd;							// ¥Õ¥¡¥¤¥ëµ­½Ò»Ò¡ÊÆÉ¤ß¹ş¤ßÍÑ¡Ë
-	int wfd;							// ¥Õ¥¡¥¤¥ëµ­½Ò»Ò¡Ê½ñ¤­¹ş¤ßÍÑ¡Ë
+	int sfd;							// ãƒ•ã‚¡ã‚¤ãƒ«è¨˜è¿°å­ï¼ˆèª­ã¿è¾¼ã¿ç”¨ï¼‰
+	int wfd;							// ãƒ•ã‚¡ã‚¤ãƒ«è¨˜è¿°å­ï¼ˆæ›¸ãè¾¼ã¿ç”¨ï¼‰
 	splitter *splitter = NULL;
 	static splitbuf_t splitbuf;
 	ARIB_STD_B25_BUFFER buf;
 	int split_select_finish = TSS_ERROR;
 	int code = 0;
 	int wc = 0;
-	int result = TSS_SUCCESS;							// ½èÍı·ë²Ì
+	int result = TSS_SUCCESS;							// å‡¦ç†çµæœ
 	static uint8_t buffer[MAX_READ_SIZE];
 	boolean use_stdout = TRUE;
 	boolean use_stdin = TRUE;
 
-	// ½é´ü²½
+	// åˆæœŸåŒ–
 	splitter = split_startup(param->sid);
 	if (splitter->sid_list == NULL) {
 		fprintf(stderr, "Cannot start TS splitter\n");
@@ -132,7 +132,7 @@ int execute(
 		return 1;
 	}
 
-	// ÆÉ¤ß¹ş¤ß¥Õ¥¡¥¤¥ë¥ª¡¼¥×¥ó
+	// èª­ã¿è¾¼ã¿ãƒ•ã‚¡ã‚¤ãƒ«ã‚ªãƒ¼ãƒ—ãƒ³
 	if(!strcmp("-", param->src)){
 		sfd = 0; /* stdin */
 	}else{
@@ -145,7 +145,7 @@ int execute(
 			use_stdin = FALSE;
 	}
 
-	// ½ñ¤­¹ş¤ß¥Õ¥¡¥¤¥ë¥ª¡¼¥×¥ó
+	// æ›¸ãè¾¼ã¿ãƒ•ã‚¡ã‚¤ãƒ«ã‚ªãƒ¼ãƒ—ãƒ³
 	if(!strcmp("-", param->dst)){
 		wfd = 1; /* stdout */
 	}else{
@@ -158,16 +158,16 @@ int execute(
 			use_stdout = FALSE;
 	}
 
-	// ¥Õ¥¡¥¤¥ëÆşÎÏ
+	// ãƒ•ã‚¡ã‚¤ãƒ«å…¥åŠ›
 	while ((buf.size = read(sfd, buf.data, MAX_READ_SIZE)) > 0) {
 		splitbuf.buffer_filled = 0;
 
 		while(buf.size) {
-			/* Ê¬Î¥ÂĞ¾İPID¤ÎÃê½Ğ */
+			/* åˆ†é›¢å¯¾è±¡PIDã®æŠ½å‡º */
 			if(split_select_finish != TSS_SUCCESS) {
 				split_select_finish = split_select(splitter, &buf);
 				if(split_select_finish == TSS_NULL) {
-					/* malloc¥¨¥é¡¼È¯À¸ */
+					/* mallocã‚¨ãƒ©ãƒ¼ç™ºç”Ÿ */
 					fprintf(stderr, "split_select malloc failed\n");
 					result = 1;
 					goto fin;
@@ -178,13 +178,13 @@ int execute(
 				}
 			}
 
-			/* Ê¬Î¥ÂĞ¾İ°Ê³°¤ò¤Õ¤ë¤¤Íî¤È¤¹ */
+			/* åˆ†é›¢å¯¾è±¡ä»¥å¤–ã‚’ãµã‚‹ã„è½ã¨ã™ */
 			code = split_ts(splitter, &buf, &splitbuf);
 			if(code == TSS_NULL) {
 				fprintf(stderr, "PMT reading..\n");
 			}
 			else if(code != TSS_SUCCESS) {
-				//¥×¥í¥°¥é¥à¾å¤³¤³¤Ë¤ÏÆş¤é¤Ê¤¤ fail safe
+				//ãƒ—ãƒ­ã‚°ãƒ©ãƒ ä¸Šã“ã“ã«ã¯å…¥ã‚‰ãªã„ fail safe
 				fprintf(stderr, "split_ts failed\n");
 				result = TSS_ERROR;
 				goto fin;
@@ -212,7 +212,7 @@ int execute(
 //		buf.data = buffer;
 	}
 fin:
-	// ³«Êü½èÍı
+	// é–‹æ”¾å‡¦ç†
 	free(splitbuf.buffer);
 	split_shutdown(splitter);
 	/* close output file */

@@ -10,7 +10,7 @@ config.status
 configure
 recdvb
 chkdvbsignal
-recpe1ctl
+recpt1ctl
 tssplitter_lite
 version.h
 

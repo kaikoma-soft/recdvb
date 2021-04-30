@@ -551,7 +551,7 @@ calc_cn(int fd, int type, boolean use_bell)
 					return;
 #ifdef DTV_STAT_SIGNAL_STRENGTH
 				}else{
-				    fprintf(stderr,"\rSNR0: %d", prop[0].u.st.stat[0].uvalue);
+				    fprintf(stderr,"\rSNR0: %lld", prop[0].u.st.stat[0].uvalue);
 					return;
 				}
 #endif
@@ -613,37 +613,10 @@ show_channels(void)
 	else
 		fprintf(stderr, "13-62: Terrestrial Channels\n");
 
-	fprintf(stderr, "101ch: NHK BS1\n");
-	fprintf(stderr, "103ch: NHK BS Premium\n");
-	fprintf(stderr, "141ch: BS Nittele\n");
-	fprintf(stderr, "151ch: BS Asahi\n");
-	fprintf(stderr, "161ch: BS-TBS\n");
-	fprintf(stderr, "171ch: BS Japan\n");
-	fprintf(stderr, "181ch: BS Fuji\n");
-	fprintf(stderr, "191ch: WOWOW Prime\n");
-	fprintf(stderr, "192ch: WOWOW Live\n");
-	fprintf(stderr, "193ch: WOWOW Cinema\n");
-	fprintf(stderr, "200ch: Star Channel1\n");
-	fprintf(stderr, "201ch: Star Channel2\n");
-	fprintf(stderr, "202ch: Star Channel3\n");
-	fprintf(stderr, "211ch: BS11 Digital\n");
-	fprintf(stderr, "222ch: TwellV\n");
-	fprintf(stderr, "231ch: Housou Daigaku 1\n");
-	fprintf(stderr, "232ch: Housou Daigaku 2\n");
-	fprintf(stderr, "233ch: Housou Daigaku 3\n");
-	fprintf(stderr, "234ch: Green Channel\n");
-	fprintf(stderr, "236ch: BS Animax\n");
-	fprintf(stderr, "238ch: FOX bs238\n");
-	fprintf(stderr, "241ch: BS SkyPer!\n");
-	fprintf(stderr, "242ch: J SPORTS 1\n");
-	fprintf(stderr, "243ch: J SPORTS 2\n");
-	fprintf(stderr, "244ch: J SPORTS 3\n");
-	fprintf(stderr, "245ch: J SPORTS 4\n");
-	fprintf(stderr, "251ch: BS Tsuri Vision\n");
-	fprintf(stderr, "252ch: IMAGICA BS\n");
-	fprintf(stderr, "255ch: Nihon Eiga Senmon Channel\n");
-	fprintf(stderr, "256ch: Disney Channel\n");
-	fprintf(stderr, "258ch: Dlife\n");
+    for ( char **p = helpChList; *p != NULL; p++ ) {
+      fprintf(stderr, "%s\n",*p);
+    }
+
 	fprintf(stderr, "C13-C63: CATV Channels\n");
 	fprintf(stderr, "CS2-CS24: CS Channels\n");
 	fprintf(stderr, "BS1_0-BS23_1: BS Channels(Transport)\n");
