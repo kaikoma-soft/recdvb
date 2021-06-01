@@ -32,13 +32,14 @@ ISDB_T_FREQ_CONV_TABLE    isdb_t_conv_table[] = {
     { BS_01, CHTYPE_SATELLITE, 2, 0x4012, "171"},  /* BSテレ東 */
     { BS_03, CHTYPE_SATELLITE, 0, 0x4030, "191"},  /* WOWOWプライム */
     { BS_03, CHTYPE_SATELLITE, 1, 0x4031, "103"},  /* NHKBSプレミアム */
-    { BS_03, CHTYPE_SATELLITE, 2, 0x4632, "256"},  /* ディズニーch */
     { BS_05, CHTYPE_SATELLITE, 0, 0x4450, "192"},  /* WOWOWライブ */
     { BS_05, CHTYPE_SATELLITE, 1, 0x4451, "193"},  /* WOWOWシネマ */
     { BS_09, CHTYPE_SATELLITE, 0, 0x4090, "211"},  /* BS11イレブン */
     { BS_09, CHTYPE_SATELLITE, 1, 0x4091, "200"},  /* スターチャンネル1 */
+    { BS_09, CHTYPE_SATELLITE, 1, 0x4091, "800"},  /* スターチャンネル */
     { BS_09, CHTYPE_SATELLITE, 2, 0x4092, "222"},  /* BS12トゥエルビ */
     { BS_11, CHTYPE_SATELLITE, 1, 0x46b1, "241"},  /* BSスカパー！ */
+    { BS_11, CHTYPE_SATELLITE, 1, 0x46b1, "840"},  /* スカパー！ガイド */
     { BS_11, CHTYPE_SATELLITE, 2, 0x46b2, "231"},  /* 放送大学ex */
     { BS_11, CHTYPE_SATELLITE, 2, 0x46b2, "232"},  /* 放送大学on */
     { BS_11, CHTYPE_SATELLITE, 2, 0x46b2, "531"},  /* 放送大学ラジオ */
@@ -49,6 +50,7 @@ ISDB_T_FREQ_CONV_TABLE    isdb_t_conv_table[] = {
     { BS_13, CHTYPE_SATELLITE, 2, 0x46d2, "236"},  /* BSアニマックス */
     { BS_15, CHTYPE_SATELLITE, 0, 0x40f1, "101"},  /* NHKBS1 */
     { BS_15, CHTYPE_SATELLITE, 0, 0x40f1, "102"},  /* NHKBS1 */
+    { BS_15, CHTYPE_SATELLITE, 0, 0x40f1, "700"},  /* NHKデータ1 */
     { BS_15, CHTYPE_SATELLITE, 0, 0x40f1, "707"},  /* 707チャンネル */
     { BS_15, CHTYPE_SATELLITE, 1, 0x40f2, "201"},  /* スターチャンネル2 */
     { BS_15, CHTYPE_SATELLITE, 1, 0x40f2, "202"},  /* スターチャンネル3 */
@@ -59,6 +61,7 @@ ISDB_T_FREQ_CONV_TABLE    isdb_t_conv_table[] = {
     { BS_21, CHTYPE_SATELLITE, 0, 0x4750, "252"},  /* WOWOWプラス */
     { BS_21, CHTYPE_SATELLITE, 1, 0x4751, "255"},  /* 日本映画専門ch */
     { BS_21, CHTYPE_SATELLITE, 2, 0x4752, "234"},  /* グリーンチャンネル */
+    { BS_23, CHTYPE_SATELLITE, 0, 0x4770, "256"},  /* ディズニーch */
 
     { CS_02, CHTYPE_SATELLITE, 0, 0x6020, "CS2" },  /* ND2 */
     { CS_04, CHTYPE_SATELLITE, 0, 0x7040, "CS4" },  /* ND4 */
@@ -222,7 +225,10 @@ char *helpChList[] = {
 	"255 ch : 日本映画専門ch",
 	"256 ch : ディズニーch",
 	"531 ch : 放送大学ラジオ",
+	"700 ch : NHKデータ1",
 	"707 ch : 707チャンネル",
+	"800 ch : スターチャンネル",
+	"840 ch : スカパー！ガイド",
 	"",
 	" 55 ch : ショップチャンネル",
 	"101 ch : スカパー！インフォ",
@@ -282,5 +288,5 @@ char *helpChList[] = {
 	NULL,
 };
 
-// created by mkChConvTable.rb (2021-04-30 14:30:16 +0900)
-// BS = 32, CS = 55
+// created by mkChConvTable.rb (2021-06-01 10:15:30 +0900)
+// BS = 35, CS = 55
