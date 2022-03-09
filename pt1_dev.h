@@ -41,6 +41,6 @@ int isdb_t_dev[] = {
 #define NUM_ISDB_T_DEV			(sizeof(isdb_t_dev)/sizeof(int))
 #endif
 
-#include "ch_conv_table.h"
+#include "ch_conv_table_dvb.h"
 
 #endif

@@ -30,6 +30,7 @@ ISDB_T_FREQ_CONV_TABLE    isdb_t_conv_table[] = {
     { BS_01, CHTYPE_SATELLITE, 0, 0x4010, "151"},  /* BS朝日1 */
     { BS_01, CHTYPE_SATELLITE, 1, 0x4011, "161"},  /* BS-TBS */
     { BS_01, CHTYPE_SATELLITE, 2, 0x4012, "171"},  /* BSテレ東 */
+    { BS_01, CHTYPE_SATELLITE, 2, 0x4012, "172"},  /* BSテレ東2 */
     { BS_03, CHTYPE_SATELLITE, 0, 0x4030, "191"},  /* WOWOWプライム */
     { BS_03, CHTYPE_SATELLITE, 1, 0x4031, "103"},  /* NHKBSプレミアム */
     { BS_05, CHTYPE_SATELLITE, 0, 0x4450, "192"},  /* WOWOWライブ */
@@ -50,8 +51,6 @@ ISDB_T_FREQ_CONV_TABLE    isdb_t_conv_table[] = {
     { BS_13, CHTYPE_SATELLITE, 2, 0x46d2, "236"},  /* BSアニマックス */
     { BS_15, CHTYPE_SATELLITE, 0, 0x40f1, "101"},  /* NHKBS1 */
     { BS_15, CHTYPE_SATELLITE, 0, 0x40f1, "102"},  /* NHKBS1 */
-    { BS_15, CHTYPE_SATELLITE, 0, 0x40f1, "700"},  /* NHKデータ1 */
-    { BS_15, CHTYPE_SATELLITE, 0, 0x40f1, "707"},  /* 707チャンネル */
     { BS_15, CHTYPE_SATELLITE, 1, 0x40f2, "201"},  /* スターチャンネル2 */
     { BS_15, CHTYPE_SATELLITE, 1, 0x40f2, "202"},  /* スターチャンネル3 */
     { BS_19, CHTYPE_SATELLITE, 0, 0x4730, "245"},  /* J SPORTS 4 */
@@ -62,6 +61,9 @@ ISDB_T_FREQ_CONV_TABLE    isdb_t_conv_table[] = {
     { BS_21, CHTYPE_SATELLITE, 1, 0x4751, "255"},  /* 日本映画専門ch */
     { BS_21, CHTYPE_SATELLITE, 2, 0x4752, "234"},  /* グリーンチャンネル */
     { BS_23, CHTYPE_SATELLITE, 0, 0x4770, "256"},  /* ディズニーch */
+    { BS_23, CHTYPE_SATELLITE, 1, 0x4971, "265"},  /* BSよしもと */
+    { BS_23, CHTYPE_SATELLITE, 2, 0x4972, "263"},  /* BSJapanext */
+    { BS_23, CHTYPE_SATELLITE, 3, 0x4973, "260"},  /* BS松竹東急 */
 
     { CS_02, CHTYPE_SATELLITE, 0, 0x6020, "CS2" },  /* ND2 */
     { CS_04, CHTYPE_SATELLITE, 0, 0x7040, "CS4" },  /* ND4 */
@@ -202,6 +204,7 @@ char *helpChList[] = {
 	"151 ch : BS朝日1",
 	"161 ch : BS-TBS",
 	"171 ch : BSテレ東",
+	"172 ch : BSテレ東2",
 	"181 ch : BSフジ・181",
 	"191 ch : WOWOWプライム",
 	"192 ch : WOWOWライブ",
@@ -224,9 +227,10 @@ char *helpChList[] = {
 	"252 ch : WOWOWプラス",
 	"255 ch : 日本映画専門ch",
 	"256 ch : ディズニーch",
+	"260 ch : BS松竹東急",
+	"263 ch : BSJapanext",
+	"265 ch : BSよしもと",
 	"531 ch : 放送大学ラジオ",
-	"700 ch : NHKデータ1",
-	"707 ch : 707チャンネル",
 	"800 ch : スターチャンネル",
 	"840 ch : スカパー！ガイド",
 	"",
@@ -288,5 +292,5 @@ char *helpChList[] = {
 	NULL,
 };
 
-// created by mkChConvTable.rb (2021-06-01 10:15:30 +0900)
-// BS = 35, CS = 55
+// created by mkChConvTable.rb (2022-03-09 17:56:13 +0900)
+// BS = 37, CS = 55

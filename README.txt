@@ -14,9 +14,16 @@ recdvb
 
 fork 直後からの変更履歴
  * 2021/06/01 ディズニーch の移動  BS03_2 → BS23_0
+ * 2022/03/09 BSに 下記の 3局追加
+           BSよしもと     BS23_1
+           BSJapanext     BS23_2
+           BS松竹東急     BS23_3
 
 インストール方法は次の通りです。
 
+  % mkdir /tmp/recdvb
+  % cd /tmp/recdvb
+  % git clone https://github.com/kaikoma-soft/recdvb .
   % ./autogen.sh
   % ./configure --enable-b25
   % make
