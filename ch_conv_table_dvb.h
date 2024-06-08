@@ -29,31 +29,30 @@
 ISDB_T_FREQ_CONV_TABLE    isdb_t_conv_table[] = {
     { BS_01, CHTYPE_SATELLITE, 0, 0x4010, "151"},  /* BS朝日1 */
     { BS_01, CHTYPE_SATELLITE, 1, 0x4011, "161"},  /* BS-TBS */
+    { BS_01, CHTYPE_SATELLITE, 1, 0x4011, "162"},  /* BS-TBS */
     { BS_01, CHTYPE_SATELLITE, 2, 0x4012, "171"},  /* BSテレ東 */
     { BS_01, CHTYPE_SATELLITE, 2, 0x4012, "172"},  /* BSテレ東2 */
     { BS_03, CHTYPE_SATELLITE, 0, 0x4030, "191"},  /* WOWOWプライム */
-    { BS_03, CHTYPE_SATELLITE, 1, 0x4031, "103"},  /* NHKBSプレミアム */
+    { BS_03, CHTYPE_SATELLITE, 1, 0x4031, "103"},  /* NHK */
     { BS_05, CHTYPE_SATELLITE, 0, 0x4450, "192"},  /* WOWOWライブ */
     { BS_05, CHTYPE_SATELLITE, 1, 0x4451, "193"},  /* WOWOWシネマ */
     { BS_09, CHTYPE_SATELLITE, 0, 0x4090, "211"},  /* BS11イレブン */
-    { BS_09, CHTYPE_SATELLITE, 1, 0x4091, "200"},  /* スターチャンネル1 */
-    { BS_09, CHTYPE_SATELLITE, 1, 0x4091, "800"},  /* スターチャンネル */
     { BS_09, CHTYPE_SATELLITE, 2, 0x4092, "222"},  /* BS12トゥエルビ */
-    { BS_11, CHTYPE_SATELLITE, 1, 0x46b1, "241"},  /* BSスカパー！ */
-    { BS_11, CHTYPE_SATELLITE, 1, 0x46b1, "840"},  /* スカパー！ガイド */
-    { BS_11, CHTYPE_SATELLITE, 2, 0x46b2, "231"},  /* 放送大学ex */
-    { BS_11, CHTYPE_SATELLITE, 2, 0x46b2, "232"},  /* 放送大学on */
+    { BS_11, CHTYPE_SATELLITE, 2, 0x46b2, "231"},  /* 放送大学テレビ */
+    { BS_11, CHTYPE_SATELLITE, 2, 0x46b2, "232"},  /* 放送大学テレビ */
     { BS_11, CHTYPE_SATELLITE, 2, 0x46b2, "531"},  /* 放送大学ラジオ */
     { BS_11, CHTYPE_SATELLITE, 3, 0x46b3, "251"},  /* BS釣りビジョン */
     { BS_13, CHTYPE_SATELLITE, 0, 0x40d0, "141"},  /* BS日テレ */
     { BS_13, CHTYPE_SATELLITE, 0, 0x40d0, "142"},  /* BS日テレ */
     { BS_13, CHTYPE_SATELLITE, 1, 0x40d1, "181"},  /* BSフジ・181 */
+    { BS_13, CHTYPE_SATELLITE, 1, 0x40d1, "182"},  /* BSフジ・182 */
     { BS_13, CHTYPE_SATELLITE, 2, 0x46d2, "236"},  /* BSアニマックス */
-    { BS_15, CHTYPE_SATELLITE, 0, 0x40f1, "101"},  /* NHKBS1 */
-    { BS_15, CHTYPE_SATELLITE, 0, 0x40f1, "102"},  /* NHKBS1 */
-    { BS_15, CHTYPE_SATELLITE, 1, 0x40f2, "201"},  /* スターチャンネル2 */
-    { BS_15, CHTYPE_SATELLITE, 1, 0x40f2, "202"},  /* スターチャンネル3 */
+    { BS_15, CHTYPE_SATELLITE, 0, 0x40f1, "101"},  /* NHK BS */
+    { BS_15, CHTYPE_SATELLITE, 0, 0x40f1, "102"},  /* NHK BS */
+    { BS_15, CHTYPE_SATELLITE, 1, 0x40f2, "200"},  /* スターチャンネル */
+    { BS_15, CHTYPE_SATELLITE, 1, 0x40f2, "800"},  /* スターチャンネル */
     { BS_19, CHTYPE_SATELLITE, 0, 0x4730, "245"},  /* J SPORTS 4 */
+    { BS_19, CHTYPE_SATELLITE, 0, 0x4730, "849"},  /* スカパー！ガイド */
     { BS_19, CHTYPE_SATELLITE, 1, 0x4731, "242"},  /* J SPORTS 1 */
     { BS_19, CHTYPE_SATELLITE, 2, 0x4732, "243"},  /* J SPORTS 2 */
     { BS_19, CHTYPE_SATELLITE, 3, 0x4733, "244"},  /* J SPORTS 3 */
@@ -112,22 +111,22 @@ ISDB_T_FREQ_CONV_TABLE    isdb_t_conv_table[] = {
     { CS_14, CHTYPE_SATELLITE, 0, 0x70e0, "310" },  /* スーパー！ドラマTV */
     { CS_14, CHTYPE_SATELLITE, 0, 0x70e0, "342" },  /* ヒストリーチャンネル */
     { CS_16, CHTYPE_SATELLITE, 0, 0x7100, "290" },  /* SKY STAGE */
-    { CS_16, CHTYPE_SATELLITE, 0, 0x7100, "311" },  /* AXN 海外ドラマ */
-    { CS_16, CHTYPE_SATELLITE, 0, 0x7100, "316" },  /* AXNミステリー */
+    { CS_16, CHTYPE_SATELLITE, 0, 0x7100, "311" },  /* アクションチャンネル */
+    { CS_16, CHTYPE_SATELLITE, 0, 0x7100, "316" },  /* ミステリーチャンネル */
     { CS_16, CHTYPE_SATELLITE, 0, 0x7100, "321" },  /* スペシャプラス */
     { CS_16, CHTYPE_SATELLITE, 0, 0x7100, "333" },  /* AT−X */
-    { CS_16, CHTYPE_SATELLITE, 0, 0x7100, "353" },  /* BBCワールド */
+    { CS_16, CHTYPE_SATELLITE, 0, 0x7100, "353" },  /* BBCニュース */
     { CS_18, CHTYPE_SATELLITE, 0, 0x7120, "240" },  /* ムービープラス */
     { CS_18, CHTYPE_SATELLITE, 0, 0x7120, "262" },  /* ゴルフネットワーク */
-    { CS_18, CHTYPE_SATELLITE, 0, 0x7120, "305" },  /* 銀河◆歴ドラ・サスペ */
-    { CS_18, CHTYPE_SATELLITE, 0, 0x7120, "314" },  /* 女性ch／LaLa */
+    { CS_18, CHTYPE_SATELLITE, 0, 0x7120, "305" },  /* チャンネル銀河 */
+    { CS_18, CHTYPE_SATELLITE, 0, 0x7120, "314" },  /* LaLaTV */
     { CS_20, CHTYPE_SATELLITE, 0, 0x7140, "307" },  /* フジテレビONE */
     { CS_20, CHTYPE_SATELLITE, 0, 0x7140, "308" },  /* フジテレビTWO */
     { CS_20, CHTYPE_SATELLITE, 0, 0x7140, "309" },  /* フジテレビNEXT */
     { CS_20, CHTYPE_SATELLITE, 0, 0x7140, "322" },  /* スペースシャワーTV */
     { CS_22, CHTYPE_SATELLITE, 0, 0x7160, "161" },  /* QVC */
     { CS_22, CHTYPE_SATELLITE, 0, 0x7160, "297" },  /* TBSチャンネル2 */
-    { CS_22, CHTYPE_SATELLITE, 0, 0x7160, "312" },  /* FOX */
+    { CS_22, CHTYPE_SATELLITE, 0, 0x7160, "312" },  /* Dlife */
     { CS_22, CHTYPE_SATELLITE, 0, 0x7160, "351" },  /* TBS NEWS */
     { CS_24, CHTYPE_SATELLITE, 0, 0x7180, "223" },  /* 映画・chNECO */
     { CS_24, CHTYPE_SATELLITE, 0, 0x7180, "257" },  /* 日テレジータス */
@@ -196,29 +195,28 @@ ISDB_T_FREQ_CONV_TABLE    isdb_t_conv_table[] = {
 
 
 char *helpChList[] = {
-	"101 ch : NHKBS1",
-	"102 ch : NHKBS1",
-	"103 ch : NHKBSプレミアム",
+	"101 ch : NHK BS",
+	"102 ch : NHK BS",
+	"103 ch : NHK",
 	"141 ch : BS日テレ",
 	"142 ch : BS日テレ",
 	"151 ch : BS朝日1",
 	"161 ch : BS-TBS",
+	"162 ch : BS-TBS",
 	"171 ch : BSテレ東",
 	"172 ch : BSテレ東2",
 	"181 ch : BSフジ・181",
+	"182 ch : BSフジ・182",
 	"191 ch : WOWOWプライム",
 	"192 ch : WOWOWライブ",
 	"193 ch : WOWOWシネマ",
-	"200 ch : スターチャンネル1",
-	"201 ch : スターチャンネル2",
-	"202 ch : スターチャンネル3",
+	"200 ch : スターチャンネル",
 	"211 ch : BS11イレブン",
 	"222 ch : BS12トゥエルビ",
-	"231 ch : 放送大学ex",
-	"232 ch : 放送大学on",
+	"231 ch : 放送大学テレビ",
+	"232 ch : 放送大学テレビ",
 	"234 ch : グリーンチャンネル",
 	"236 ch : BSアニマックス",
-	"241 ch : BSスカパー！",
 	"242 ch : J SPORTS 1",
 	"243 ch : J SPORTS 2",
 	"244 ch : J SPORTS 3",
@@ -232,7 +230,7 @@ char *helpChList[] = {
 	"265 ch : BSよしもと",
 	"531 ch : 放送大学ラジオ",
 	"800 ch : スターチャンネル",
-	"840 ch : スカパー！ガイド",
+	"849 ch : スカパー！ガイド",
 	"",
 	" 55 ch : ショップチャンネル",
 	"101 ch : スカパー！インフォ",
@@ -257,15 +255,15 @@ char *helpChList[] = {
 	"299 ch : テレ朝チャンネル2",
 	"300 ch : 日テレプラス",
 	"301 ch : エンタメ〜テレ",
-	"305 ch : 銀河◆歴ドラ・サスペ",
+	"305 ch : チャンネル銀河",
 	"307 ch : フジテレビONE",
 	"308 ch : フジテレビTWO",
 	"309 ch : フジテレビNEXT",
 	"310 ch : スーパー！ドラマTV",
-	"311 ch : AXN 海外ドラマ",
-	"312 ch : FOX",
-	"314 ch : 女性ch／LaLa",
-	"316 ch : AXNミステリー",
+	"311 ch : アクションチャンネル",
+	"312 ch : Dlife",
+	"314 ch : LaLaTV",
+	"316 ch : ミステリーチャンネル",
 	"317 ch : KBS World",
 	"318 ch : Mnet",
 	"321 ch : スペシャプラス",
@@ -284,7 +282,7 @@ char *helpChList[] = {
 	"343 ch : ナショジオ",
 	"349 ch : 日テレNEWS24",
 	"351 ch : TBS NEWS",
-	"353 ch : BBCワールド",
+	"353 ch : BBCニュース",
 	"354 ch : CNNj",
 	"363 ch : 囲碁・将棋チャンネル",
 	"800 ch : スポーツライブ＋",
@@ -292,5 +290,5 @@ char *helpChList[] = {
 	NULL,
 };
 
-// created by mkChConvTable.rb (2022-03-09 17:56:13 +0900)
-// BS = 37, CS = 55
+// created by mkChConvTable.rb (2024-06-07 16:50:05 +0900)
+// BS = 36, CS = 55
