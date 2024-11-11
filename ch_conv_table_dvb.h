@@ -32,6 +32,7 @@ ISDB_T_FREQ_CONV_TABLE    isdb_t_conv_table[] = {
     { BS_01, CHTYPE_SATELLITE, 1, 0x4011, "162"},  /* BS-TBS */
     { BS_01, CHTYPE_SATELLITE, 2, 0x4012, "171"},  /* BSテレ東 */
     { BS_01, CHTYPE_SATELLITE, 2, 0x4012, "172"},  /* BSテレ東2 */
+    { BS_01, CHTYPE_SATELLITE, 2, 0x4012, "777"},  /* 株価情報 */
     { BS_03, CHTYPE_SATELLITE, 0, 0x4030, "191"},  /* WOWOWプライム */
     { BS_03, CHTYPE_SATELLITE, 1, 0x4631, "236"},  /* BSアニマックス */
     { BS_03, CHTYPE_SATELLITE, 2, 0x4632, "251"},  /* BS釣りビジョン */
@@ -39,13 +40,13 @@ ISDB_T_FREQ_CONV_TABLE    isdb_t_conv_table[] = {
     { BS_05, CHTYPE_SATELLITE, 1, 0x4451, "193"},  /* WOWOWシネマ */
     { BS_09, CHTYPE_SATELLITE, 0, 0x4090, "211"},  /* BS11イレブン */
     { BS_09, CHTYPE_SATELLITE, 2, 0x4092, "222"},  /* BS12トゥエルビ */
-    { BS_11, CHTYPE_SATELLITE, 2, 0x46b2, "231"},  /* 放送大学テレビ */
-    { BS_11, CHTYPE_SATELLITE, 2, 0x46b2, "232"},  /* 放送大学テレビ */
-    { BS_11, CHTYPE_SATELLITE, 2, 0x46b2, "531"},  /* 放送大学ラジオ */
     { BS_13, CHTYPE_SATELLITE, 0, 0x40d0, "141"},  /* BS日テレ */
     { BS_13, CHTYPE_SATELLITE, 0, 0x40d0, "142"},  /* BS日テレ */
     { BS_13, CHTYPE_SATELLITE, 1, 0x40d1, "181"},  /* BSフジ・181 */
     { BS_13, CHTYPE_SATELLITE, 1, 0x40d1, "182"},  /* BSフジ・182 */
+    { BS_13, CHTYPE_SATELLITE, 2, 0x46d2, "231"},  /* 放送大学テレビ */
+    { BS_13, CHTYPE_SATELLITE, 2, 0x46d2, "232"},  /* 放送大学テレビ */
+    { BS_13, CHTYPE_SATELLITE, 2, 0x46d2, "531"},  /* 放送大学ラジオ */
     { BS_15, CHTYPE_SATELLITE, 0, 0x40f1, "101"},  /* NHK BS */
     { BS_15, CHTYPE_SATELLITE, 0, 0x40f1, "102"},  /* NHK BS */
     { BS_15, CHTYPE_SATELLITE, 1, 0x40f2, "200"},  /* スターチャンネル */
@@ -226,6 +227,7 @@ char *helpChList[] = {
 	"263 ch : BSJapanext",
 	"265 ch : BSよしもと",
 	"531 ch : 放送大学ラジオ",
+	"777 ch : 株価情報",
 	"800 ch : スターチャンネル",
 	"",
 	" 55 ch : ショップチャンネル",
@@ -286,5 +288,5 @@ char *helpChList[] = {
 	NULL,
 };
 
-// created by mkChConvTable.rb (2024-10-09 13:18:15 +0900)
-// BS = 34, CS = 55
+// created by mkChConvTable.rb (2024-11-11 11:06:48 +0900)
+// BS = 35, CS = 55
