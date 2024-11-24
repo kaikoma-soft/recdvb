@@ -44,6 +44,7 @@ fork 直後からの変更履歴
   % ./configure --enable-b25
   % make
   % sudo make install 
+  % make maintainer-clean
 
 
 以下はオリジナルの README
